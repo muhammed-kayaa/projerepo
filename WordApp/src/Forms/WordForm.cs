@@ -37,6 +37,17 @@ namespace WordApp.Forms
                 MessageBox.Show("İngilizce ve Türkçe alanları zorunludur!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            // Resim yolu boşsa veya sadece klasörse, otomatik olarak words klasörüne dosya adını ekle
+            string picturePath = txtPicture.Text.Trim();
+            if (string.IsNullOrWhiteSpace(picturePath) || picturePath == @"C:\\words\\")
+            {
+                picturePath = $"words\\{txtEng.Text.Trim().ToLower()}.jpg";
+            }
+            else if (!picturePath.StartsWith("words") && !picturePath.StartsWith(@"C:\\") && !picturePath.Contains(":\\"))
+            {
+                // Kullanıcı sadece dosya adı girdiyse, words klasörüne ekle
+                picturePath = $"words\\{picturePath}";
+            }
             using (var db = new AppDbContext())
             {
                 if (db.Words.Any(w => w.EngWordName == txtEng.Text.Trim()))
@@ -48,7 +59,7 @@ namespace WordApp.Forms
                 {
                     EngWordName = txtEng.Text.Trim(),
                     TurWordName = txtTur.Text.Trim(),
-                    Picture = txtPicture.Text.Trim()
+                    Picture = picturePath
                 };
                 db.Words.Add(word);
                 db.SaveChanges();
