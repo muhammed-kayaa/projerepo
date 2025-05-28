@@ -11,10 +11,18 @@ namespace WordApp.Models
         public string Picture { get; set; }
         public ICollection<WordSample> WordSamples { get; set; }
 
-        // Parametresiz constructor EKLE!
+        // Sınav algoritması için gerekli alanlar
+        public int RepeatCount { get; set; } // Kaç kez sınava girdi
+        public int CorrectStreak { get; set; } // Üst üste doğru sayısı
+        public DateTime? LastCorrectDate { get; set; } // Son doğru cevap tarihi
+        public bool IsKnown { get; set; } // 6 kez doğruysa bilinen havuzda
+        public int? UserId { get; set; } // Kullanıcıya özel istatistik için
+        public string CorrectDatesJson { get; set; } // Doğru cevap tarihleri (JSON)
+
+        // Parametresiz constructor
         public Word() { }
 
-        // Eğer gerekiyorsa parametreli constructor da kalabilir:
+        // Parametreli constructor (isteğe bağlı)
         public Word(int wordId, string engWordName, string turWordName, string picture)
         {
             WordID = wordId;
@@ -22,12 +30,5 @@ namespace WordApp.Models
             TurWordName = turWordName;
             Picture = picture;
         }
-
-        // Sınav algoritması için gerekli alanlar
-        public int RepeatCount { get; set; } // Tekrar sayısı
-        public int CorrectStreak { get; set; } // Üst üste doğru sayısı
-        public DateTime? LastCorrectDate { get; set; } // Son doğru cevap tarihi
-        public bool IsKnown { get; set; } // 6 kez doğruysa bilinen havuzda
-        public int? UserId { get; set; } // Kullanıcıya özel istatistik için
     }
 }

@@ -1,110 +1,157 @@
 using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using WordApp.Data;
-using WordApp.Models;
 
 namespace WordApp.Forms
 {
     public class WordleForm : Form
     {
-        private List<Word> words;
-        private string answer;
-        private int attempts = 0;
-        private TextBox txtGuess;
-        private Button btnCheck;
-        private Label lblResult;
-        private FlowLayoutPanel panelGuesses;
-        private int maxAttempts = 6;
-        private List<string> guessHistory = new List<string>();
+        private string targetWord = "PLANET";
+        private int currentRow = 0;
+        private const int maxRows = 5; // 5 attempts
+        private const int wordLength = 6;
+        private TextBox inputBox;
+        private Button submitButton;
+        private Panel gridPanel;
+        private Label revealedLettersLabel;
+        private bool[] revealedIndexes = new bool[wordLength];
+        private Random random = new Random();
 
         public WordleForm()
         {
-            this.Text = "Wordle (Bulmaca)";
-            this.Size = new System.Drawing.Size(420, 500);
-            Word selectedWord = null;
-            using (var db = new AppDbContext())
+            this.Text = "Wordle";
+            this.Size = new Size(60 * wordLength + 60, 60 * maxRows + 180);
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.BackColor = Color.White;
+
+            gridPanel = new Panel
             {
-                // Uygun uzunlukta kelimelerden rastgele birini doğrudan veritabanından seç
-                var query = db.Words.Where(w => w.EngWordName.Length >= 4 && w.EngWordName.Length <= 7);
-                int count = query.Count();
-                if (count == 0)
-                {
-                    MessageBox.Show("Bulmaca için uygun uzunlukta kelime yok! Lütfen önce kelime ekleyin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    this.Close();
-                    return;
-                }
-                var rnd = new Random();
-                int skip = rnd.Next(count);
-                selectedWord = query.Skip(skip).FirstOrDefault();
-            }
-            answer = selectedWord.EngWordName.ToUpper();
-            txtGuess = new TextBox { Top = 30, Left = 30, Width = 200, MaxLength = answer.Length };
-            btnCheck = new Button { Text = "Tahmin Et", Top = 70, Left = 30, Width = 100 };
-            btnCheck.Click += BtnCheck_Click;
-            lblResult = new Label { Top = 120, Left = 30, Width = 350, Height = 40, Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold) };
-            panelGuesses = new FlowLayoutPanel { Top = 170, Left = 30, Width = 340, Height = 220, AutoScroll = true };
-            var btnAI = new Button { Text = "Yapay Zeka İpucu", Top = 70, Left = 150, Width = 120 };
-            btnAI.Click += (s, e) => {
-                string hint = $"Kelime {answer.Length} harfli ve '{answer[0]}' harfiyle başlıyor.";
-                MessageBox.Show($"AI İpucu: {hint}", "Yapay Zeka", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Left = 20,
+                Top = 50,
+                Width = 60 * wordLength,
+                Height = 60 * maxRows,
+                BackColor = Color.White
             };
-            this.Controls.Add(txtGuess);
-            this.Controls.Add(btnCheck);
-            this.Controls.Add(btnAI);
-            this.Controls.Add(lblResult);
-            this.Controls.Add(panelGuesses);
-        }
-        private void BtnCheck_Click(object sender, EventArgs e)
-        {
-            if (attempts >= maxAttempts) return;
-            string guess = txtGuess.Text.Trim().ToUpper();
-            if (guess.Length != answer.Length)
+            this.Controls.Add(gridPanel);
+
+            revealedLettersLabel = new Label
             {
-                lblResult.Text = $"Kelime {answer.Length} harfli olmalı!";
+                Left = 20,
+                Top = 10,
+                Width = 60 * wordLength + 80,
+                Height = 30,
+                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                Text = "Revealed: " + GetRevealedLetters()
+            };
+            this.Controls.Add(revealedLettersLabel);
+
+            inputBox = new TextBox
+            {
+                Left = 20,
+                Top = gridPanel.Bottom + 10,
+                Width = 60 * wordLength
+            };
+            this.Controls.Add(inputBox);
+
+            submitButton = new Button
+            {
+                Text = "Guess",
+                Left = inputBox.Right + 10,
+                Top = inputBox.Top,
+                Width = 80
+            };
+            submitButton.Click += SubmitButton_Click;
+            this.Controls.Add(submitButton);
+        }
+
+        private string GetRevealedLetters()
+        {
+            char[] display = new char[wordLength];
+            for (int i = 0; i < wordLength; i++)
+            {
+                display[i] = revealedIndexes[i] ? targetWord[i] : '_';
+            }
+            return string.Join(" ", display);
+        }
+
+        private void RevealRandomLetter()
+        {
+            var hiddenIndexes = Enumerable.Range(0, wordLength).Where(i => !revealedIndexes[i]).ToList();
+            if (hiddenIndexes.Count > 0)
+            {
+                int idx = hiddenIndexes[random.Next(hiddenIndexes.Count)];
+                revealedIndexes[idx] = true;
+            }
+        }
+
+        private void SubmitButton_Click(object sender, EventArgs e)
+        {
+            string guess = inputBox.Text.Trim().ToUpper();
+            if (guess.Length != wordLength)
+            {
+                MessageBox.Show($"Word must be {wordLength} letters.");
                 return;
             }
-            if (!words.Any(w => w.EngWordName.ToUpper() == guess))
+
+            if (currentRow >= maxRows)
             {
-                lblResult.Text = "Bu kelime veritabanında yok!";
+                MessageBox.Show("No more attempts left!");
                 return;
             }
-            attempts++;
-            guessHistory.Add(guess);
-            DrawGuess(guess);
-            if (guess == answer)
+
+            for (int i = 0; i < wordLength; i++)
             {
-                lblResult.Text = $"Tebrikler! {attempts}. denemede buldunuz.";
-                txtGuess.Enabled = false;
-                btnCheck.Enabled = false;
-            }
-            else if (attempts == maxAttempts)
-            {
-                lblResult.Text = $"Bilemediniz! Doğru cevap: {answer}";
-                txtGuess.Enabled = false;
-                btnCheck.Enabled = false;
-            }
-            else
-            {
-                lblResult.Text = $"Yanlış! Kalan hakkınız: {maxAttempts - attempts}";
-            }
-        }
-        private void DrawGuess(string guess)
-        {
-            var panel = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, Width = 40 * guess.Length, Height = 40 };
-            for (int i = 0; i < guess.Length; i++)
-            {
-                var lbl = new Label { Text = guess[i].ToString(), Width = 35, Height = 35, TextAlign = System.Drawing.ContentAlignment.MiddleCenter, BorderStyle = BorderStyle.FixedSingle, Font = new System.Drawing.Font("Segoe UI", 14, System.Drawing.FontStyle.Bold) };
-                if (guess[i] == answer[i])
-                    lbl.BackColor = System.Drawing.Color.LightGreen;
-                else if (answer.Contains(guess[i]))
-                    lbl.BackColor = System.Drawing.Color.Khaki;
+                Label lbl = new Label
+                {
+                    Width = 55,
+                    Height = 55,
+                    Left = i * 60,
+                    Top = currentRow * 60,
+                    Text = guess[i].ToString(),
+                    Font = new Font("Segoe UI", 24, FontStyle.Bold),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BorderStyle = BorderStyle.FixedSingle
+                };
+
+                if (guess[i] == targetWord[i])
+                {
+                    lbl.BackColor = Color.Green;
+                    lbl.ForeColor = Color.White;
+                }
+                else if (targetWord.Contains(guess[i]))
+                {
+                    lbl.BackColor = Color.Gold;
+                    lbl.ForeColor = Color.Black;
+                }
                 else
-                    lbl.BackColor = System.Drawing.Color.LightGray;
-                panel.Controls.Add(lbl);
+                {
+                    lbl.BackColor = Color.LightGray;
+                    lbl.ForeColor = Color.Black;
+                }
+
+                gridPanel.Controls.Add(lbl);
             }
-            panelGuesses.Controls.Add(panel);
+
+            if (guess == targetWord)
+            {
+                MessageBox.Show("Congratulations, you guessed it!");
+                this.Close();
+                return;
+            }
+
+            // Reveal a random letter after a wrong guess
+            RevealRandomLetter();
+            revealedLettersLabel.Text = "Revealed: " + GetRevealedLetters();
+
+            currentRow++;
+            inputBox.Text = "";
+
+            if (currentRow == maxRows)
+            {
+                MessageBox.Show($"You didn't guess it! The correct word was: {targetWord}");
+                this.Close();
+            }
         }
     }
 }
