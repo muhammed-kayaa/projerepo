@@ -19,7 +19,7 @@ namespace WordApp.Forms
             this.Size = new System.Drawing.Size(400, 300);
             txtEng = new TextBox { PlaceholderText = "İngilizce Kelime", Top = 30, Left = 30, Width = 300 };
             txtTur = new TextBox { PlaceholderText = "Türkçe Karşılığı", Top = 70, Left = 30, Width = 300 };
-            txtPicture = new TextBox { PlaceholderText = "Resim Yolu (opsiyonel)", Top = 110, Left = 30, Width = 300 };
+            txtPicture = new TextBox { Top = 80, Left = 40, Width = 400, Text = "C:\\words\\" };
             btnSave = new Button { Text = "Kaydet", Top = 160, Left = 30, Width = 100 };
             btnSave.Click += BtnSave_Click;
             this.Controls.Add(txtEng);
