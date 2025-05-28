@@ -13,6 +13,17 @@
             "cwd": "${workspaceFolder}/WordApp",
             "stopAtEntry": false,
             "console": "internalConsole"
+        },
+        {
+            "name": "C#: WordApp Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/WordApp/WordApp.csproj"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
         }
     ]
 }

@@ -15,8 +15,6 @@ namespace WordApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            // Giriş ekranını göster
             using (var loginForm = new LoginForm())
             {
                 if (loginForm.ShowDialog() == DialogResult.OK)
@@ -34,7 +32,9 @@ namespace WordApp
         private TextBox txtPassword;
         private Button btnLogin;
         private Button btnRegister;
+        private Button btnForgotPassword;
         private Label lblError;
+        private ListBox lstUsers;
         public User LoggedInUser { get; private set; }
 
         public LoginForm()
@@ -44,85 +44,82 @@ namespace WordApp
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new System.Drawing.Size(350, 250);
+            this.Size = new System.Drawing.Size(420, 350);
+            // Modern ve düzenli giriş ekranı tasarımı
             this.BackColor = System.Drawing.Color.White;
+            var panel = new Panel {
+                Left = 20, Top = 20, Width = 360, Height = 290,
+                BackColor = System.Drawing.Color.FromArgb(220, 60, 40)
+            };
+            this.Controls.Add(panel);
 
-            var lblTitle = new Label
-            {
-                Text = "WordApp Giriş",
-                Font = new System.Drawing.Font("Segoe UI", 16, System.Drawing.FontStyle.Bold),
+            var lblTitle = new Label {
+                Text = "Hoşgeldin, giriş yap",
+                Font = new System.Drawing.Font("Segoe UI", 20, System.Drawing.FontStyle.Bold),
                 AutoSize = false,
                 TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                Dock = DockStyle.Top,
-                Height = 50
-            };
-            this.Controls.Add(lblTitle);
-
-            var lblUsername = new Label { Text = "Kullanıcı Adı:", Left = 40, Top = 70, Width = 100 };
-            txtUsername = new TextBox { Left = 150, Top = 65, Width = 140 };
-
-            var lblPassword = new Label { Text = "Şifre:", Left = 40, Top = 110, Width = 100 };
-            txtPassword = new TextBox { Left = 150, Top = 105, Width = 140, PasswordChar = '●' };
-
-            btnLogin = new Button
-            {
-                Text = "Giriş Yap",
-                Left = 150,
-                Top = 150,
-                Width = 140,
-                BackColor = System.Drawing.Color.FromArgb(0, 120, 215),
+                Top = 15, Left = 0, Width = 360, Height = 40,
                 ForeColor = System.Drawing.Color.White,
+                BackColor = System.Drawing.Color.Transparent
+            };
+            panel.Controls.Add(lblTitle);
+
+            var lblUsername = new Label { Text = "Kullanıcı Adı:", Left = 30, Top = 90, Width = 80, ForeColor = System.Drawing.Color.White, BackColor = System.Drawing.Color.Transparent };
+            txtUsername = new TextBox { Left = 110, Top = 85, Width = 210 };
+            panel.Controls.Add(lblUsername);
+            panel.Controls.Add(txtUsername);
+
+            var lblPassword = new Label { Text = "Şifreniz:", Left = 30, Top = 130, Width = 80, ForeColor = System.Drawing.Color.White, BackColor = System.Drawing.Color.Transparent };
+            txtPassword = new TextBox { Left = 110, Top = 125, Width = 210, PasswordChar = '●' };
+            panel.Controls.Add(lblPassword);
+            panel.Controls.Add(txtPassword);
+
+            var chkRemember = new CheckBox { Text = "Beni hatırla", Left = 30, Top = 165, Width = 100, ForeColor = System.Drawing.Color.White, BackColor = System.Drawing.Color.Transparent };
+            panel.Controls.Add(chkRemember);
+
+            btnForgotPassword = new Button {
+                Text = "Şifremi unuttum?",
+                Left = 200, Top = 160, Width = 120, Height = 25,
+                BackColor = System.Drawing.Color.White,
+                ForeColor = System.Drawing.Color.FromArgb(220, 60, 40),
+                FlatStyle = FlatStyle.Flat
+            };
+            btnForgotPassword.Click += BtnForgotPassword_Click;
+            panel.Controls.Add(btnForgotPassword);
+
+            btnLogin = new Button {
+                Text = "GİRİŞ",
+                Left = 30, Top = 200, Width = 290, Height = 40,
+                BackColor = System.Drawing.Color.White,
+                ForeColor = System.Drawing.Color.FromArgb(220, 60, 40),
+                Font = new System.Drawing.Font("Segoe UI", 12, System.Drawing.FontStyle.Bold),
                 FlatStyle = FlatStyle.Flat
             };
             btnLogin.Click += BtnLogin_Click;
+            panel.Controls.Add(btnLogin);
 
-            btnRegister = new Button
-            {
+            btnRegister = new Button {
                 Text = "Kayıt Ol",
-                Left = 40,
-                Top = 150,
-                Width = 100,
-                BackColor = System.Drawing.Color.LightGray
+                Left = 30, Top = 250, Width = 290, Height = 30,
+                BackColor = System.Drawing.Color.LightGray,
+                ForeColor = System.Drawing.Color.FromArgb(220, 60, 40),
+                FlatStyle = FlatStyle.Flat
             };
             btnRegister.Click += BtnRegister_Click;
+            panel.Controls.Add(btnRegister);
 
-            lblError = new Label
-            {
-                ForeColor = System.Drawing.Color.Red,
-                Left = 40,
-                Top = 185,
-                Width = 250,
-                Height = 30,
-                Visible = false
+            lblError = new Label {
+                ForeColor = System.Drawing.Color.Yellow,
+                Left = 30, Top = 235, Width = 290, Height = 20,
+                Visible = false,
+                BackColor = System.Drawing.Color.Transparent
             };
-
-            var lblRegisterInfo = new Label
-            {
-                Text = "Bir hesabın yok mu?",
-                Left = 40,
-                Top = 185,
-                Width = 120,
-                ForeColor = System.Drawing.Color.Black
-            };
-            this.Controls.Add(lblRegisterInfo);
-
-            btnRegister.Left = 170; // Butonu açıklamanın yanına al
-            btnRegister.Top = 180;
-            btnRegister.Width = 120;
-
-            lblError.Top = 220;
-
-            this.Controls.Add(lblUsername);
-            this.Controls.Add(txtUsername);
-            this.Controls.Add(lblPassword);
-            this.Controls.Add(txtPassword);
-            this.Controls.Add(btnLogin);
-            this.Controls.Add(btnRegister);
-            this.Controls.Add(lblError);
+            panel.Controls.Add(lblError);
         }
 
         private void BtnLogin_Click(object sender, EventArgs e)
         {
+            // Giriş yapma işlemleri
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
@@ -137,12 +134,7 @@ namespace WordApp
                 }
                 else
                 {
-                    // Kullanıcı adı hiç yoksa farklı mesaj göster
-                    bool userExists = db.Users.Any(u => u.Username == username);
-                    if (!userExists)
-                        lblError.Text = "Mevcut hesap bulunamadı, lütfen kayıt olun!";
-                    else
-                        lblError.Text = "Kullanıcı adı veya şifre hatalı!";
+                    lblError.Text = "Kullanıcı adı veya şifre hatalı.";
                     lblError.Visible = true;
                 }
             }
@@ -155,6 +147,34 @@ namespace WordApp
                 registerForm.ShowDialog();
             }
         }
+
+        private void BtnForgotPassword_Click(object sender, EventArgs e)
+        {
+            string username = txtUsername.Text.Trim();
+            if (string.IsNullOrEmpty(username))
+            {
+                MessageBox.Show("Lütfen kullanıcı adınızı girin.");
+                return;
+            }
+            using (var db = new AppDbContext())
+            {
+                var user = db.Users.FirstOrDefault(u => u.Username == username);
+                if (user == null)
+                {
+                    MessageBox.Show("Kullanıcı bulunamadı.");
+                }
+                else
+                {
+                    string newPassword = Microsoft.VisualBasic.Interaction.InputBox("Yeni şifrenizi girin:", "Şifre Yenile");
+                    if (!string.IsNullOrWhiteSpace(newPassword))
+                    {
+                        user.Password = newPassword;
+                        db.SaveChanges();
+                        MessageBox.Show("Şifreniz başarıyla güncellendi.");
+                    }
+                }
+            }
+        }
     }
 
     // Ana Form
@@ -163,6 +183,14 @@ namespace WordApp
         private User currentUser;
         private Label lblWelcome;
         private Button btnSettings;
+        private Button btnAddWord;
+        private Button btnQuiz;
+        private Button btnAnalysis;
+        private Button btnWordle;
+        private Button btnWordChain;
+        private Button btnStartGame;
+        private Label lblCommand;
+        private int wordCountLimit = 10;
 
         public MainForm(User user)
         {
@@ -171,6 +199,21 @@ namespace WordApp
             this.Size = new System.Drawing.Size(900, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = System.Drawing.Color.FromArgb(245, 245, 255);
+
+            lblCommand = new Label
+            {
+                Text = "Hoşgeldiniz! Komutlar ve duyurular burada gösterilecek.",
+                Font = new System.Drawing.Font("Segoe UI", 12, System.Drawing.FontStyle.Bold),
+                AutoSize = false,
+                Width = 800,
+                Height = 30,
+                Top = 0,
+                Left = 30,
+                ForeColor = System.Drawing.Color.DarkBlue,
+                BackColor = System.Drawing.Color.FromArgb(230, 230, 255),
+                TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+            };
+            this.Controls.Add(lblCommand);
 
             lblWelcome = new Label
             {
@@ -196,6 +239,97 @@ namespace WordApp
             btnSettings.Click += BtnSettings_Click;
             this.Controls.Add(btnSettings);
 
+            btnAddWord = new Button
+            {
+                Text = "Kelime Ekle",
+                Left = 170,
+                Top = 80,
+                Width = 120,
+                Height = 40,
+                BackColor = System.Drawing.Color.FromArgb(0, 180, 100),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnAddWord.Click += BtnAddWord_Click;
+            this.Controls.Add(btnAddWord);
+
+            btnQuiz = new Button
+            {
+                Text = "Oyuna Başla", // Değiştirildi
+                Left = 310,
+                Top = 80,
+                Width = 120,
+                Height = 40,
+                BackColor = System.Drawing.Color.FromArgb(200, 120, 0),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnQuiz.Click += BtnQuiz_Click;
+            this.Controls.Add(btnQuiz);
+
+            btnAnalysis = new Button
+            {
+                Text = "Analiz Raporu",
+                Left = 450,
+                Top = 80,
+                Width = 120,
+                Height = 40,
+                BackColor = System.Drawing.Color.FromArgb(120, 0, 200),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnAnalysis.Click += BtnAnalysis_Click;
+            this.Controls.Add(btnAnalysis);
+
+            btnWordle = new Button
+            {
+                Text = "Wordle (Bulmaca)",
+                Left = 590,
+                Top = 80,
+                Width = 120,
+                Height = 40,
+                BackColor = System.Drawing.Color.FromArgb(0, 180, 180),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnWordle.Click += BtnWordle_Click;
+            this.Controls.Add(btnWordle);
+
+            btnWordChain = new Button
+            {
+                Text = "Word Chain",
+                Left = 730,
+                Top = 80,
+                Width = 120,
+                Height = 40,
+                BackColor = System.Drawing.Color.FromArgb(180, 180, 0),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnWordChain.Click += BtnWordChain_Click;
+            this.Controls.Add(btnWordChain);
+
+            btnStartGame = new Button
+            {
+                Text = "Sınavı Başlat", // Değiştirildi
+                Left = 30,
+                Top = 130,
+                Width = 200,
+                Height = 60,
+                Font = new System.Drawing.Font("Segoe UI", 16, System.Drawing.FontStyle.Bold),
+                BackColor = System.Drawing.Color.FromArgb(0, 180, 100),
+                ForeColor = System.Drawing.Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnStartGame.Click += BtnQuiz_Click; // Artık kelime sınavı başlatacak
+            this.Controls.Add(btnStartGame);
+            // Ayarlar butonunu öne çıkar
+            btnSettings.Top = 210;
+            btnSettings.Left = 30;
+            btnSettings.Width = 200;
+            btnSettings.Height = 50;
+            btnSettings.Font = new System.Drawing.Font("Segoe UI", 12, System.Drawing.FontStyle.Bold);
+
             this.FormClosed += (s, e) => Application.Exit();
 
             // Buraya ana ekran için ek tasarım ve kontroller ekleyebilirsiniz
@@ -203,10 +337,55 @@ namespace WordApp
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            using (var settingsForm = new FormSettings())
+            var settingsForm = new WordApp.Forms.SettingsForm(wordCountLimit);
+            if (settingsForm.ShowDialog() == DialogResult.OK)
             {
-                settingsForm.ShowDialog();
+                wordCountLimit = settingsForm.GetWordCount();
+                MessageBox.Show($"Yeni kelime sınırı: {wordCountLimit}");
             }
+        }
+
+        private void BtnAddWord_Click(object sender, EventArgs e)
+        {
+            var wordForm = new WordApp.Forms.WordForm();
+            wordForm.ShowDialog();
+        }
+
+        private void BtnQuiz_Click(object sender, EventArgs e)
+        {
+            var quizForm = new WordApp.Forms.QuizForm(currentUser);
+            quizForm.ShowDialog();
+        }
+
+        private void BtnAnalysis_Click(object sender, EventArgs e)
+        {
+            var analysisForm = new WordApp.Forms.AnalysisForm(currentUser);
+            analysisForm.ShowDialog();
+        }
+
+        private void BtnWordle_Click(object sender, EventArgs e)
+        {
+            var wordleForm = new WordApp.Forms.WordleForm();
+            wordleForm.ShowDialog();
+        }
+
+        private void BtnWordChain_Click(object sender, EventArgs e)
+        {
+            var wordChainForm = new WordApp.Forms.WordChainForm();
+            wordChainForm.ShowDialog();
+        }
+
+        private void BtnStartGame_Click(object sender, EventArgs e)
+        {
+            var wordleForm = new WordApp.Forms.WordleForm();
+            wordleForm.ShowDialog();
+        }
+
+        // Komut/duyuru güncelleme fonksiyonu
+        public void SetCommand(string message)
+        {
+            if (lblCommand != null)
+                lblCommand.Text = message;
         }
     }
 
