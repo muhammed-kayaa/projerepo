@@ -9,14 +9,26 @@ WordApp
 ├── src
 │   ├── Models
 │   │   ├── User.cs
-│   │   └── Word.cs
+│   │   ├── Word.cs
+│   │   ├── WordSample.cs
+│   │   └── WordCorrectDate.cs
 │   ├── Data
 │   │   └── AppDbContext.cs
+│   ├── Forms
+│   │   ├── LoginForm.cs
+│   │   ├── RegisterForm.cs
+│   │   ├── MainForm.cs
+│   │   ├── WordForm.cs
+│   │   ├── QuizForm.cs
+│   │   ├── AnalysisForm.cs
+│   │   ├── WordleForm.cs
+│   │   └── WordChainForm.cs
+│   ├── Services
+│   │   └── UserService.cs
 │   ├── Program.cs
-│   └── Services
-│       └── UserService.cs
 ├── WordApp.csproj
-└── README.md
+├── README.md
+└── WordApp_sample_data.sql
 ```
 
 ## Features
