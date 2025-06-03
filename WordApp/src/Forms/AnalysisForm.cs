@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
 using WordApp.Data;
 using WordApp.Models;
@@ -10,24 +12,32 @@ namespace WordApp.Forms
     {
         private Label lbl;
         private Button btnRefresh;
+        private Button btnPrint;
+        private string reportContent;
+
         public AnalysisForm(User user)
         {
             this.Text = "Analiz Raporu";
-            this.Size = new System.Drawing.Size(400, 350);
-            lbl = new Label {
-                Top = 30, Left = 30, Width = 340, Height = 120
+            this.Size = new System.Drawing.Size(400, 400);
+
+            lbl = new Label
+            {
+                Top = 30,
+                Left = 30,
+                Width = 340,
+                Height = 120
             };
+
             btnRefresh = new Button { Text = "Yenile", Top = 170, Left = 200, Width = 100 };
             btnRefresh.Click += (s, e) => UpdateReport(user);
-            var btnAI = new Button { Text = "Yapay Zeka Analizi", Top = 170, Left = 30, Width = 150 };
-            btnAI.Click += (s, e) => {
-                double userPercent = GetUserPercent(user);
-                string msg = userPercent < 50 ? "Daha çok tekrar yapmalısınız!" : "Harika gidiyorsunuz!";
-                MessageBox.Show($"AI Analiz: {msg}", "Yapay Zeka", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            };
+
+            btnPrint = new Button { Text = "Yazdır", Top = 220, Left = 30, Width = 150 };
+            btnPrint.Click += (s, e) => PrintReport();
+
             this.Controls.Add(lbl);
-            this.Controls.Add(btnAI);
             this.Controls.Add(btnRefresh);
+            this.Controls.Add(btnPrint);
+
             UpdateReport(user);
         }
 
@@ -37,6 +47,7 @@ namespace WordApp.Forms
             int solvedWords = 0;
             int userTotal = 0;
             int userSolved = 0;
+
             using (var db = new AppDbContext())
             {
                 // Sadece kullanıcıya ait kelimeler
@@ -46,21 +57,42 @@ namespace WordApp.Forms
                 totalWords = db.Words.Count();
                 solvedWords = db.Words.Count(w => w.CorrectStreak > 0);
             }
+
             double percent = totalWords == 0 ? 0 : (solvedWords * 100.0 / totalWords);
             double userPercent = userTotal == 0 ? 0 : (userSolved * 100.0 / userTotal);
-            lbl.Text = $"Tüm kelimeler: {totalWords}\nTüm kullanıcılar için başarı: %{percent:F1}\n\nSizin toplam kelimeniz: {userTotal}\nSizin başarı oranınız: %{userPercent:F1}";
+
+            reportContent = $"Tüm kelimeler: {totalWords}\n" +
+                            $"Tüm kullanıcılar için başarı: %{percent:F1}\n\n" +
+                            $"Sizin toplam kelimeniz: {userTotal}\n" +
+                            $"Sizin başarı oranınız: %{userPercent:F1}";
+
+            lbl.Text = reportContent;
         }
 
-        private double GetUserPercent(User user)
+        private void PrintReport()
         {
-            int userTotal = 0;
-            int userSolved = 0;
-            using (var db = new AppDbContext())
+            PrintDocument printDocument = new PrintDocument();
+            printDocument.PrintPage += new PrintPageEventHandler(PrintPage);
+            
+            PrintDialog printDialog = new PrintDialog
             {
-                userTotal = db.Words.Count(w => w.UserId == user.UserId);
-                userSolved = db.Words.Count(w => w.UserId == user.UserId && w.CorrectStreak > 0);
+                Document = printDocument
+            };
+
+            if (printDialog.ShowDialog() == DialogResult.OK)
+            {
+                printDocument.Print();
             }
-            return userTotal == 0 ? 0 : (userSolved * 100.0 / userTotal);
+        }
+
+        private void PrintPage(object sender, PrintPageEventArgs e)
+        {
+            e.Graphics.DrawString(
+                reportContent,
+                new Font("Arial", 12),
+                Brushes.Black,
+                new RectangleF(50, 50, e.PageBounds.Width - 100, e.PageBounds.Height - 100)
+            );
         }
     }
 }
