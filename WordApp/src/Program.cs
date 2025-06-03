@@ -34,7 +34,7 @@ namespace WordApp
         private Button btnRegister;
         private Button btnForgotPassword;
         private Label lblError;
-        private ListBox lstUsers;
+
         public User LoggedInUser { get; private set; }
 
         public LoginForm()

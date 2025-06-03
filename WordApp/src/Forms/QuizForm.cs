@@ -17,15 +17,9 @@ namespace WordApp.Forms
         private Button btnNext;
         private int correctCount = 0;
         private User currentUser;
-        private List<Word> allWords;
-        private List<Word> knownWords;
-        private List<Word> unknownWords;
         private DateTime today;
         private int dailyLimit = 10;
         private List<int> quizWordIdsToday;
-        private List<int> lastDayKnown = new List<int>();
-        private List<int> lastWeekKnown = new List<int>();
-        private List<int> todayKnown = new List<int>();
         private int quizDay = 0;
         private PictureBox pictureBox;
 
