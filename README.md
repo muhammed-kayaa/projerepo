@@ -37,6 +37,7 @@ Kullanıcılar günlük sınavda çıkan kelime sayısını değiştirebilir.
 5. Analiz Raporu
 Kullanıcılar, başarı oranlarını ve çözdükleri kelimeleri analiz edebilir.
 Genel başarı oranı ve kullanıcıya özel başarı oranı görüntülenebilir.
-6. Oyun Modülleri
+Analiz raporu, yazıcıdan kağıt çıktısı olarak alınabilir.
+7. Oyun Modülleri
 Wordle (Bulmaca): Kullanıcılar, verilen ipuçlarına göre kelime tahmin eder.
 Word Chain (Kelime Zinciri): Kullanıcılar, son harfe göre yeni kelimeler ekleyerek zincir oluşturur.
